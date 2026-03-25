@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  COLLECTOR
+  SUBSCRIBER
+}
+
+enum BillingFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum DueStatus {
+  PENDING
+  COLLECTED
+  SUBMITTED
+  CANCELLED
+}
+
+enum SubmissionCycle {
+  DAILY
+  WEEKLY
+}
+
+model Station {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  address     String?
+  collectors  Collector[]
+  villagers   Villager[]
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model User {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  passwordHash String
+  role         UserRole
+  collector    Collector?
+  villager     Villager?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Collector {
+  id                String          @id @default(cuid())
+  code              String          @unique
+  name              String
+  phone             String?
+  settlementCycle   SubmissionCycle @default(DAILY)
+  stationId         String
+  userId            String?         @unique
+  station           Station         @relation(fields: [stationId], references: [id])
+  user              User?           @relation(fields: [userId], references: [id])
+  assignedVillagers Villager[]
+  collections       Collection[]
+  submissions       Submission[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Villager {
+  id            String                @id @default(cuid())
+  code          String                @unique
+  name          String
+  phone         String?
+  ward          String?
+  stationId     String
+  collectorId   String?
+  userId        String?               @unique
+  station       Station               @relation(fields: [stationId], references: [id])
+  collector     Collector?            @relation(fields: [collectorId], references: [id])
+  user          User?                 @relation(fields: [userId], references: [id])
+  subscriptions ServiceSubscription[]
+  collections   Collection[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+}
+
+model Service {
+  id            String                @id @default(cuid())
+  code          String                @unique
+  name          String
+  amount        Int
+  frequency     BillingFrequency
+  subscriptions ServiceSubscription[]
+  collections   Collection[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+}
+
+model ServiceSubscription {
+  id          String      @id @default(cuid())
+  villagerId  String
+  serviceId   String
+  active      Boolean     @default(true)
+  startedAt   DateTime    @default(now())
+  endedAt     DateTime?
+  villager    Villager    @relation(fields: [villagerId], references: [id])
+  service     Service     @relation(fields: [serviceId], references: [id])
+  collections Collection[]
+
+  @@unique([villagerId, serviceId])
+}
+
+model Collection {
+  id             String               @id @default(cuid())
+  receiptNumber  String               @unique
+  amount         Int
+  billingPeriod  String
+  status         DueStatus            @default(PENDING)
+  collectedAt    DateTime?
+  submittedAt    DateTime?
+  notes          String?
+  villagerId     String
+  collectorId    String
+  serviceId      String
+  subscriptionId String?
+  submissionId   String?
+  villager       Villager             @relation(fields: [villagerId], references: [id])
+  collector      Collector            @relation(fields: [collectorId], references: [id])
+  service        Service              @relation(fields: [serviceId], references: [id])
+  subscription   ServiceSubscription? @relation(fields: [subscriptionId], references: [id])
+  submission     Submission?          @relation(fields: [submissionId], references: [id])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([collectorId, status, collectedAt])
+  @@index([submissionId])
+}
+
+model Submission {
+  id              String           @id @default(cuid())
+  referenceNumber String           @unique
+  cycle           SubmissionCycle
+  amount          Int
+  collectionCount Int
+  submittedAt     DateTime         @default(now())
+  receivedBy      String?
+  notes           String?
+  stationId       String
+  collectorId     String
+  station         Station          @relation(fields: [stationId], references: [id])
+  collector       Collector        @relation(fields: [collectorId], references: [id])
+  collections     Collection[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([collectorId, submittedAt])
+}
+

@@ -1,8 +1,44 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+html[data-theme="light"] {
+  --background: #edf2ee;
+  --foreground: #16241e;
+  --foreground-muted: rgba(22, 36, 30, 0.64);
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-elevated: rgba(255, 255, 255, 0.94);
+  --surface-muted: #f4f8f5;
+  --surface-strong: #e8efe9;
+  --line: rgba(20, 41, 33, 0.1);
+  --line-strong: rgba(20, 41, 33, 0.16);
+  --brand: #0f8f67;
+  --brand-deep: #0c6f52;
+  --accent: #d8f0e6;
+  --warning: #d99215;
+  --danger: #c83b3b;
+  --shadow: 0 24px 60px rgba(12, 28, 21, 0.12);
+  --page-glow: radial-gradient(circle at top left, rgba(15, 143, 103, 0.18), transparent 30%), linear-gradient(180deg, #f8fbf9 0%, #e7eee9 100%);
+  --shell-glow: radial-gradient(circle at right top, rgba(15, 143, 103, 0.1), transparent 22%), linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(237, 242, 238, 0.96));
+}
+
+html[data-theme="dark"] {
+  --background: #0d1412;
+  --foreground: #edf5f1;
+  --foreground-muted: rgba(237, 245, 241, 0.68);
+  --surface: rgba(18, 28, 25, 0.86);
+  --surface-elevated: rgba(21, 34, 30, 0.94);
+  --surface-muted: #121d1a;
+  --surface-strong: #182622;
+  --line: rgba(227, 241, 234, 0.1);
+  --line-strong: rgba(227, 241, 234, 0.18);
+  --brand: #3cb887;
+  --brand-deep: #7ce0b9;
+  --accent: rgba(60, 184, 135, 0.18);
+  --warning: #f3b34c;
+  --danger: #ef6b6b;
+  --shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+  --page-glow: radial-gradient(circle at top left, rgba(60, 184, 135, 0.12), transparent 28%), linear-gradient(180deg, #0b1210 0%, #121b18 100%);
+  --shell-glow: radial-gradient(circle at right top, rgba(60, 184, 135, 0.1), transparent 24%), linear-gradient(180deg, rgba(15, 22, 20, 0.84), rgba(10, 15, 13, 0.98));
 }
 
 @theme inline {
@@ -12,15 +48,74 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--page-glow);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+body,
+input,
+select,
+button,
+textarea {
+  color: var(--foreground);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+input::placeholder {
+  color: var(--foreground-muted);
+}
+
+::selection {
+  background: rgba(15, 143, 103, 0.22);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--shell-glow);
+}
+
+.panel-shadow {
+  box-shadow: var(--shadow);
+}
+
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(20px);
+}
+
+.surface-muted {
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+}
+
+.surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--line-strong);
 }
